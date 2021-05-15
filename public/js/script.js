@@ -1,7 +1,6 @@
 let isRoomBuffering;
 let isRoomWaitingToPlay;
 let myPing = 0;
-let isResizing = false;
 const lastPings = [];
 const minPlayerSize = { x: 100, y: 100 };
 
