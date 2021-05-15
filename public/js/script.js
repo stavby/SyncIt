@@ -1,7 +1,9 @@
 let isRoomBuffering;
 let isRoomWaitingToPlay;
 let myPing = 0;
+let isResizing = false;
 const lastPings = [];
+const minPlayerSize = { x: 100, y: 100 };
 
 window.onload = () => {
     $('#login-modal').modal({ backdrop: 'static', keyboard: false });
@@ -278,4 +280,22 @@ const onPingResult = pingResult => {
 
 const average = arr => {
     return arr.reduce((a, b) => a + b) / arr.length;
+};
+
+const resizePlayer = dragData => {
+    const maxPlayerSize = { x: window.innerWidth, y: window.innerHeight };
+
+    if (dragData.screenX != 0 && dragData.screenY != 0) {
+        const playerIframe = $('#player');
+        let desiredWidth = playerIframe.width() + dragData.offsetX;
+        let desiredHeight = playerIframe.height() + dragData.offsetY;
+
+        desiredWidth = Math.max(desiredWidth, minPlayerSize.x);
+        desiredWidth = Math.min(desiredWidth, maxPlayerSize.x);
+        desiredHeight = Math.max(desiredHeight, minPlayerSize.y);
+        desiredHeight = Math.min(desiredHeight, maxPlayerSize.y);
+
+        playerIframe.width(desiredWidth);
+        playerIframe.height(desiredHeight);
+    }
 };
