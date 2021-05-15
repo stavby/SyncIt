@@ -1,6 +1,7 @@
 {
     "type": "module",
     "dependencies": {
+        "dateformat": "^4.5.1",
         "express": "^4.17.1",
         "socket.io": "^4.0.1"
     }
