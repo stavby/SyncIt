@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>SyncIt</title>
+        <!-- Required meta tags -->
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, shrink-to-fit=no"
+        />
+
+        <!-- Bootstrap CSS -->
+        <link
+            rel="stylesheet"
+            href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+            integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+            crossorigin="anonymous"
+        />
+        <link rel="stylesheet" href="css/styles.css" />
+    </head>
+    <body style="text-align: center; background-color: #333333">
+        <nav class="navbar navbar-dark bg-dark">
+            <a class="navbar-brand">
+                <img src="resources/logo.png" width="200" height="100" alt="" />
+            </a>
+            <button
+                class="btn btn-outline-danger my-2 my-sm-0"
+                type="submit"
+                onclick="alert('Fuck you I don\'t care')"
+            >
+                Need Help?
+            </button>
+        </nav>
+        <div id="in-room" style="display: none; color: white" class="mt-3">
+            <h1 id="main-title">Your room:</h1>
+            <button
+                id="leave-button"
+                type="button"
+                class="btn btn-danger"
+                onclick="leaveRoom()"
+            >
+                Leave
+            </button>
+            <div
+                id="change-video"
+                style="width: 30vw; display: none"
+                class="input-group my-3 mx-auto"
+            >
+                <input
+                    id="change-video-url"
+                    type="text"
+                    class="form-control"
+                    placeholder="Video URL"
+                    aria-label="Video URL"
+                    aria-describedby="button-change-video"
+                />
+                <div class="input-group-append">
+                    <button
+                        class="btn btn-secondary"
+                        type="button"
+                        id="button-change-video2"
+                        onclick="changeVideo()"
+                    >
+                        Change Video
+                    </button>
+                </div>
+            </div>
+            <div id="ping-display">
+                Your ping: <a id="ping-display-number"></a>
+            </div>
+            <div id="player" class="d-block mx-auto my-3"></div>
+            <div id="room-members"></div>
+        </div>
+
+        <!-- Modal -->
+        <div
+            class="modal fade"
+            id="login-modal"
+            tabindex="-1"
+            aria-labelledby="exampleModalLabel"
+            aria-hidden="true"
+            style="text-align: left"
+        >
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">
+                            Welcome
+                        </h5>
+                    </div>
+                    <div class="modal-body">
+                        <label for="name">Your name:</label>
+                        <input class="form-control mb-3" id="username" />
+                        <div class="dropdown-divider"></div>
+                        <h5 class="mt-3">Rooms:</h5>
+                        <div id="rooms"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="container">
+                            <div class="row justify-content-md-right">
+                                <div class="col-sm">
+                                    <label for="room-name">Room name:</label>
+                                </div>
+                                <div class="col-sm">
+                                    <input
+                                        class="form-control"
+                                        id="room-name"
+                                    />
+                                </div>
+                                <div class="col-sm">
+                                    <button
+                                        type="button"
+                                        class="btn btn-primary"
+                                        onClick="createRoom()"
+                                    >
+                                        Create Room
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scripts -->
+        <script src="resources/socket.io/client-dist/socket.io.js"></script>
+        <script src="js/youtube.js"></script>
+        <script src="js/script.js"></script>
+        <script src="js/socket.js"></script>
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script
+            src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            crossorigin="anonymous"
+        ></script>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+            crossorigin="anonymous"
+        ></script>
+        <script
+            src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+            crossorigin="anonymous"
+        ></script>
+    </body>
+</html>
