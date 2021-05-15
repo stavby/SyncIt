@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import dateformat from 'dateformat';
 const __dirname = path.resolve();
 
 const app = express();
@@ -214,11 +215,7 @@ const nameValid = name => {
     return name.length <= 20 && name.match(/^[A-Za-z0-9 ]+$/);
 };
 
-const formatDateTime = dateTime => {
-    return `${dateTime.toLocaleTimeString(
-        'he-IL'
-    )} ${dateTime.toLocaleDateString('en-UK')}`;
-};
+const formatDateTime = dateTime => dateformat(dateTime, 'HH:MM:ss dd/mm/yyyy');
 
 const average = arr => {
     return arr.reduce((a, b) => a + b) / arr.length;
