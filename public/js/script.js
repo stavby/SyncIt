@@ -6,38 +6,49 @@ const minPlayerSize = { x: 100, y: 100 };
 
 window.onload = () => {
     $('#login-modal').modal({ backdrop: 'static', keyboard: false });
+    alertify.set('notifier', 'delay', 2);
 };
 
 const createRoom = () => {
-    const roomName = $('#room-name')[0].value;
-    const username = $('#username')[0].value;
+    const roomNameBox = $('#room-name');
+    const usernameBox = $('#username');
+    const roomName = roomNameBox.val();
+    const username = usernameBox.val();
+
+    let isUsernameValid = true;
+    let isRoomNameValid = true;
 
     if (!roomName) {
-        alert('Fill room name');
-        return;
+        alertify.error('Fill room name');
+        isRoomNameValid = false;
+    } else if (!nameValid(roomName)) {
+        alertify.error('Invalid room name');
+        isRoomNameValid = false;
+    } else if (rooms[roomName]) {
+        alertify.error('A room with this name already exists');
+        isRoomNameValid = false;
     }
     if (!username) {
-        alert('Fill username');
-        return;
-    }
-    if (!nameValid(username)) {
-        alert('Invalid username');
-        return;
-    }
-    if (!nameValid(roomName)) {
-        alert('Invalid room name');
-        return;
-    }
-    if (rooms[roomName]) {
-        alert('A room with this name already exists');
-        return;
-    }
-    if (Object.values(usernames).includes(username)) {
-        alert('A user with this username already exists');
-        return;
+        alertify.error('Fill username');
+        isUsernameValid = false;
+    } else if (!nameValid(username)) {
+        alertify.error('Invalid username');
+        isUsernameValid = false;
+    } else if (Object.values(usernames).includes(username)) {
+        alertify.error('A user with this username already exists');
+        isUsernameValid = false;
     }
 
-    socket.emit('newRoom', { roomName, username });
+    if (!isUsernameValid) {
+        usernameBox.addClass('is-invalid');
+    }
+    if (!isRoomNameValid) {
+        roomNameBox.addClass('is-invalid');
+    }
+
+    if (isUsernameValid && isRoomNameValid) {
+        socket.emit('newRoom', { roomName, username });
+    }
 };
 
 const leaveRoom = () => {
@@ -47,31 +58,41 @@ const leaveRoom = () => {
     isInRoom = false;
     socket.emit('leaveRoom');
     $('#in-room').css('display', 'none');
-    player.pauseVideo();
+    if (player) {
+        player.pauseVideo();
+    }
     $('#login-modal').modal({ backdrop: 'static', keyboard: false });
 };
 
 const joinRoom = roomName => {
-    const username = $('#username')[0].value;
+    const usernameBox = $('#username');
+    const username = usernameBox.val();
+
+    let isRoomValid = true;
+    let isUsernameValid = true;
 
     if (!roomName || !rooms[roomName]) {
-        alert('Invalid room');
-        return;
+        alertify.error('Invalid room');
+        isRoomValid = false;
     }
     if (!username) {
-        alert('Fill username');
-        return;
-    }
-    if (!nameValid(username)) {
-        alert('Invalid username');
-        return;
-    }
-    if (Object.values(usernames).includes(username)) {
-        alert('A user with this username already exists');
-        return;
+        alertify.error('Fill username');
+        isUsernameValid = false;
+    } else if (!nameValid(username)) {
+        alertify.error('Invalid username');
+        isUsernameValid = false;
+    } else if (Object.values(usernames).includes(username)) {
+        alertify.error('A user with this username already exists');
+        isUsernameValid = false;
     }
 
-    socket.emit('joinRoom', { roomName, username });
+    if (!isUsernameValid) {
+        usernameBox.addClass('is-invalid');
+    }
+
+    if (isUsernameValid && isRoomValid) {
+        socket.emit('joinRoom', { roomName, username });
+    }
 };
 
 const joinedRoom = roomName => {
@@ -183,7 +204,7 @@ const updateRoomMembers = () => {
 };
 
 const joinFailed = message => {
-    alert(message);
+    alertify.error(message);
 };
 
 const usersData = newUsers => {
@@ -239,7 +260,7 @@ const changeVideo = () => {
     const urlPreset = 'youtube.com/watch?v=';
 
     if (!url.includes(urlPreset)) {
-        alert('Invalid video URL');
+        alertify.error('Invalid video URL');
         return;
     }
 
@@ -259,7 +280,7 @@ const onDisconnect = () => {
     usernames = {};
     myRoom = undefined;
     updateLoginRooms();
-    alert('You were disconnected');
+    alertify.error('You were disconnected');
 };
 
 const onReconnect = () => {
@@ -301,3 +322,5 @@ const resizePlayer = dragData => {
         playerIframe.height(desiredHeight);
     }
 };
+
+const removeIsInvalid = event => $(event.target).removeClass('is-invalid');
