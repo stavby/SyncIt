@@ -90,7 +90,10 @@ const joinedRoom = roomName => {
 };
 
 const nameValid = name => {
-    return name.length <= 20 && name.match(/^[A-Za-z0-9 ]+$/);
+    return (
+        name.length <= 20 &&
+        /^[א-תA-Za-z0-9 ]*[א-תA-Za-z0-9][א-תA-Za-z0-9 ]*$/.test(name)
+    );
 };
 
 const sendBlip = () => {
