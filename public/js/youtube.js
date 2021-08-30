@@ -1,6 +1,7 @@
 let player;
 let video = 'rubpIfLPzvU';
 let isBuffering = false;
+let bufferTimeout;
 
 const createYoutubePlayer = newVideo => {
     const tag = document.createElement('script');
@@ -27,18 +28,18 @@ function onYouTubeIframeAPIReady() {
 
 const onPlayerStateChange = event => {
     if (isOwner()) {
-        if (event.data === playerStates.PLAYING && isRoomBuffering) {
+        if (isPlayingOrBuffering(event.data) && isRoomBuffering) {
             player.pauseVideo();
             isRoomWaitingToPlay = true;
         }
     } else {
         if (event.data === playerStates.BUFFERING) {
-            setTimeout(() => {
+            bufferTimeout = setTimeout(() => {
                 if (player.getPlayerState() === playerStates.BUFFERING) {
                     socket.emit('buffering');
                     isBuffering = true;
                 }
-            }, 400);
+            }, 300);
         } else if (isBuffering) {
             socket.emit('bufferingEnded');
             isBuffering = false;
@@ -54,3 +55,6 @@ const playerStates = {
     PLAYING: 1,
     UNSTARTED: -1,
 };
+
+const isPlayingOrBuffering = state =>
+    [playerStates.PLAYING, playerStates.BUFFERING].includes(state);

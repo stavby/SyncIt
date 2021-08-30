@@ -1,5 +1,5 @@
 let isRoomBuffering;
-let isRoomWaitingToPlay;
+let isRoomWaitingToPlay = false;
 let myPing = 0;
 const lastPings = [];
 const minPlayerSize = { x: 100, y: 100 };
@@ -159,7 +159,7 @@ const syncTime = blipData => {
     let allowedDelta = 0;
 
     if (blipData.isPlaying) {
-        allowedDelta = 0.8;
+        allowedDelta = 0.6;
         desiredTime += myPing / 1000;
         if (rooms && rooms[myRoom] && rooms[myRoom].ping) {
             desiredTime += rooms[myRoom].ping / 1000;
@@ -168,6 +168,9 @@ const syncTime = blipData => {
 
     if (Math.abs(player.getCurrentTime() - desiredTime) > allowedDelta) {
         player.seekTo(desiredTime);
+        if (bufferTimeout) {
+            clearTimeout(bufferTimeout);
+        }
     }
 };
 
@@ -227,7 +230,9 @@ const roomsData = newRooms => {
         if (isRoomBuffering) {
             if (!wasRoomBuffering) {
                 isRoomWaitingToPlay =
-                    player.getPlayerState() === playerStates.PLAYING;
+                    isPlayingOrBuffering(player.getPlayerState()) ||
+                    isRoomWaitingToPlay;
+
                 player.pauseVideo();
             }
         } else if (isRoomWaitingToPlay) {
