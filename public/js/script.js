@@ -231,8 +231,12 @@ const roomsData = newRooms => {
                 player.pauseVideo();
             }
         } else if (isRoomWaitingToPlay) {
-            player.playVideo();
-            isRoomWaitingToPlay = false;
+            setTimeout(() => {
+                if (isRoomWaitingToPlay) {
+                    player.playVideo();
+                    isRoomWaitingToPlay = false;
+                }
+            }, 50);
         }
     }
 };
