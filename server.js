@@ -3,6 +3,8 @@ import path from 'path';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import dateformat from 'dateformat';
+import localtunnel from 'localtunnel';
+import fetch from 'node-fetch';
 const __dirname = path.resolve();
 
 const app = express();
@@ -14,9 +16,8 @@ const usernames = {};
 app.use(express.static('public'));
 
 io.on('connection', socket => {
-    console.log(
-        `[${formatDateTime(new Date())}] A user has connected (${socket.id})`
-    );
+    logClientInformation(socket);
+
     socket.emit('users', usernames);
     socket.emit('rooms', rooms);
 
@@ -218,10 +219,41 @@ const nameValid = name => {
     );
 };
 
-const formatDateTime = dateTime => dateformat(dateTime, 'HH:MM:ss dd/mm/yyyy');
+const formatDateTime = dateTime => dateformat(dateTime, 'dd/mm/yyyy HH:MM:ss');
 
 const average = arr => {
     return arr.reduce((a, b) => a + b) / arr.length;
 };
+
+const logClientInformation = async socket => {
+    console.log(`[${formatDateTime(new Date())}] A user has connected:
+socket ID: ${socket?.id}`);
+
+    const ip = socket?.client?.request?.headers['x-real-ip'];
+    if (!ip) {
+        return;
+    }
+    const locationData = await fetch(`http://ip-api.com/json/${ip}`);
+    if (locationData.status !== 200) {
+        return;
+    }
+    const locationDataResult = await locationData.json();
+    if (locationDataResult.status !== 'success') {
+        return;
+    }
+
+    console.log(`IP: ${ip}
+Location: ${locationDataResult.country} - ${locationDataResult.city}`);
+};
+
+(async () => {
+    const tunnel = await localtunnel({ port: 80, subdomain: 'stav' });
+
+    console.log(`Tunnel opened at: ${tunnel.url}`);
+
+    tunnel.on('close', () => {
+        console.log('Tunnel closed');
+    });
+})();
 
 httpServer.listen('80', () => console.log('Running ...'));
