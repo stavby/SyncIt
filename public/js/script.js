@@ -64,7 +64,7 @@ const leaveRoom = () => {
     $('#login-modal').modal({ backdrop: 'static', keyboard: false });
 };
 
-const joinRoom = roomName => {
+const joinRoom = (roomName) => {
     const usernameBox = $('#username');
     const username = usernameBox.val();
 
@@ -95,7 +95,7 @@ const joinRoom = roomName => {
     }
 };
 
-const joinedRoom = roomName => {
+const joinedRoom = (roomName) => {
     myRoom = roomName;
     updateRoomMembers();
     const mainTitle = $('#main-title')[0];
@@ -110,11 +110,8 @@ const joinedRoom = roomName => {
     blipInterval = setInterval(sendBlip, 500);
 };
 
-const nameValid = name => {
-    return (
-        name.length <= 20 &&
-        /^[א-תA-Za-z0-9 ]*[א-תA-Za-z0-9][א-תA-Za-z0-9 ]*$/.test(name)
-    );
+const nameValid = (name) => {
+    return name.length <= 20 && /^[א-תA-Za-z0-9 ]*[א-תA-Za-z0-9][א-תA-Za-z0-9 ]*$/.test(name);
 };
 
 const sendBlip = () => {
@@ -127,7 +124,7 @@ const sendBlip = () => {
     }
 };
 
-const recieveBlip = blipData => {
+const recieveBlip = (blipData) => {
     if (isInRoom && player && player.getCurrentTime && !isOwner()) {
         syncVideo(blipData.video);
         syncTime(blipData);
@@ -138,13 +135,13 @@ const recieveBlip = blipData => {
     }
 };
 
-const syncVideo = video => {
+const syncVideo = (video) => {
     if (player.getVideoData().video_id !== video) {
         player.loadVideoById(video);
     }
 };
 
-const syncPlayerState = isPlaying => {
+const syncPlayerState = (isPlaying) => {
     if ((player.getPlayerState() === playerStates.PLAYING) !== isPlaying) {
         if (isPlaying) {
             player.playVideo();
@@ -154,7 +151,7 @@ const syncPlayerState = isPlaying => {
     }
 };
 
-const syncTime = blipData => {
+const syncTime = (blipData) => {
     let desiredTime = blipData.currentTime;
     let allowedDelta = 0;
 
@@ -176,9 +173,7 @@ const syncTime = blipData => {
 
 const isOwner = () => {
     if (rooms && myRoom && rooms[myRoom]) {
-        const me = rooms[myRoom].members.find(
-            member => member.id === socket.id
-        );
+        const me = rooms[myRoom].members.find((member) => member.id === socket.id);
         if (me) {
             return !!me.isOwner;
         }
@@ -193,28 +188,24 @@ const updateRoomMembers = () => {
         for (member of rooms[myRoom].members) {
             if (Object.keys(usernames).includes(member.id)) {
                 roomMembersDisplay.innerHTML += `<div>
-                    ${member.isOwner ? '<strong>Owner</strong>' : ''} ${
-                    usernames[member.id]
-                } ${member.id === socket.id ? '(You)' : ''} ${
-                    member.isBuffering
-                        ? `<a style='color: red'>BUFFERING</a>`
-                        : ''
-                }
+                    ${member.isOwner ? '<strong>Owner</strong>' : ''} ${usernames[member.id]} ${
+                    member.id === socket.id ? '(You)' : ''
+                } ${member.isBuffering ? `<a style='color: red'>BUFFERING</a>` : ''}
                 </div>`;
             }
         }
     }
 };
 
-const joinFailed = message => {
+const joinFailed = (message) => {
     alertify.error(message);
 };
 
-const usersData = newUsers => {
+const usersData = (newUsers) => {
     usernames = newUsers;
 };
 
-const roomsData = newRooms => {
+const roomsData = (newRooms) => {
     rooms = newRooms;
 
     updateLoginRooms();
@@ -223,15 +214,11 @@ const roomsData = newRooms => {
 
     if (isOwner()) {
         const wasRoomBuffering = isRoomBuffering;
-        isRoomBuffering = rooms[myRoom].members.some(
-            member => member.isBuffering
-        );
+        isRoomBuffering = rooms[myRoom].members.some((member) => member.isBuffering);
 
         if (isRoomBuffering) {
             if (!wasRoomBuffering) {
-                isRoomWaitingToPlay =
-                    isPlayingOrBuffering(player.getPlayerState()) ||
-                    isRoomWaitingToPlay;
+                isRoomWaitingToPlay = isPlayingOrBuffering(player.getPlayerState()) || isRoomWaitingToPlay;
 
                 player.pauseVideo();
             }
@@ -273,9 +260,7 @@ const changeVideo = () => {
         return;
     }
 
-    player.loadVideoById(
-        url.substr(url.indexOf(urlPreset) + urlPreset.length, 11)
-    );
+    player.loadVideoById(url.substr(url.indexOf(urlPreset) + urlPreset.length, 11));
     player.seekTo(0);
 };
 
@@ -296,11 +281,11 @@ const onReconnect = () => {
     socket.emit('info');
 };
 
-const onPing = pingTime => {
+const onPing = (pingTime) => {
     socket.emit('ping', pingTime);
 };
 
-const onPingResult = pingResult => {
+const onPingResult = (pingResult) => {
     lastPings.push(pingResult);
     if (lastPings.length > 5) {
         lastPings.shift();
@@ -310,11 +295,11 @@ const onPingResult = pingResult => {
     $('#ping-display-number').text(Math.round(myPing) + 'ms');
 };
 
-const average = arr => {
+const average = (arr) => {
     return arr.reduce((a, b) => a + b) / arr.length;
 };
 
-const resizePlayer = dragData => {
+const resizePlayer = (dragData) => {
     const maxPlayerSize = { x: window.innerWidth, y: window.innerHeight };
 
     if (dragData.screenX != 0 && dragData.screenY != 0) {
@@ -332,4 +317,4 @@ const resizePlayer = dragData => {
     }
 };
 
-const removeIsInvalid = event => $(event.target).removeClass('is-invalid');
+const removeIsInvalid = (event) => $(event.target).removeClass('is-invalid');

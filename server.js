@@ -5,6 +5,7 @@ import { Server } from 'socket.io';
 import dateformat from 'dateformat';
 import localtunnel from 'localtunnel';
 import fetch from 'node-fetch';
+import fs from 'fs';
 const __dirname = path.resolve();
 
 const app = express();
@@ -15,7 +16,7 @@ const usernames = {};
 
 app.use(express.static('public'));
 
-io.on('connection', socket => {
+io.on('connection', (socket) => {
     logClientInformation(socket);
 
     socket.emit('users', usernames);
@@ -35,10 +36,7 @@ io.on('connection', socket => {
             return;
         }
         if (Object.values(usernames).includes(username)) {
-            socket.emit(
-                'joinFailed',
-                'A user with this username already exists'
-            );
+            socket.emit('joinFailed', 'A user with this username already exists');
             return;
         }
         if (Object.keys(usernames).includes(socket.id)) {
@@ -69,10 +67,7 @@ io.on('connection', socket => {
             return;
         }
         if (Object.values(usernames).includes(username)) {
-            socket.emit(
-                'joinFailed',
-                'A user with this username already exists'
-            );
+            socket.emit('joinFailed', 'A user with this username already exists');
             return;
         }
         if (Object.keys(usernames).includes(socket.id)) {
@@ -88,13 +83,11 @@ io.on('connection', socket => {
         io.emit('rooms', rooms);
     });
 
-    socket.on('blip', blipData => {
+    socket.on('blip', (blipData) => {
         const room = getRoomOfUser(socket.id);
 
         if (room && findUserInRoom(socket.id, room).isOwner) {
-            socket.broadcast
-                .to(getRoomOfUser(socket.id))
-                .emit('blip', blipData);
+            socket.broadcast.to(getRoomOfUser(socket.id)).emit('blip', blipData);
         }
     });
 
@@ -134,7 +127,7 @@ io.on('connection', socket => {
     });
 
     const lastPings = [];
-    socket.on('ping', pingTime => {
+    socket.on('ping', (pingTime) => {
         let ping = Math.round((new Date().valueOf() - pingTime) / 2);
         const room = getRoomOfUser(socket.id);
 
@@ -151,11 +144,11 @@ io.on('connection', socket => {
         socket.emit('pingResult', ping);
     });
 
-    socket.on('disconnect', () => {
-        console.log(
-            `[${formatDateTime(new Date())}] A user has disconnected (${
-                socket.id
-            })`
+    socket.on('disconnect', (reason) => {
+        log(
+            `[${formatLogDateTime(new Date())}] A user has disconnected:
+Socket ID: ${socket.id}
+Reason: ${reason}`
         );
         leaveRoom(socket);
     });
@@ -163,7 +156,7 @@ io.on('connection', socket => {
     setInterval(() => socket.emit('ping', new Date().valueOf()), 3000);
 });
 
-const leaveRoom = socket => {
+const leaveRoom = (socket) => {
     const user = socket.id;
     const room = getRoomOfUser(user);
     if (room) {
@@ -173,10 +166,7 @@ const leaveRoom = socket => {
             const roomEntry = findUserInRoom(user, room);
 
             if (roomEntry) {
-                rooms[room].members.splice(
-                    rooms[room].members.indexOf(roomEntry),
-                    1
-                );
+                rooms[room].members.splice(rooms[room].members.indexOf(roomEntry), 1);
 
                 if (roomEntry.isOwner) {
                     rooms[room].members[0].isOwner = true;
@@ -194,17 +184,15 @@ const leaveRoom = socket => {
 };
 
 const findUserInRoom = (socketId, room) => {
-    return rooms[room].members.find(member => member.id === socketId);
+    return rooms[room].members.find((member) => member.id === socketId);
 };
 
-const findOwnerOfRoom = room => {
-    return rooms[room].members.find(member => member.isOwner);
+const findOwnerOfRoom = (room) => {
+    return rooms[room].members.find((member) => member.isOwner);
 };
 
-const getRoomOfUser = socketId => {
-    const room = Object.entries(rooms).find(room =>
-        room[1].members.map(member => member.id).includes(socketId)
-    );
+const getRoomOfUser = (socketId) => {
+    const room = Object.entries(rooms).find((room) => room[1].members.map((member) => member.id).includes(socketId));
 
     if (!room) {
         return null;
@@ -212,21 +200,20 @@ const getRoomOfUser = socketId => {
     return room[0];
 };
 
-const nameValid = name => {
-    return (
-        name.length <= 20 &&
-        /^[א-תA-Za-z0-9 ]*[א-תA-Za-z0-9][א-תA-Za-z0-9 ]*$/.test(name)
-    );
+const nameValid = (name) => {
+    return name.length <= 20 && /^[א-תA-Za-z0-9 ]*[א-תA-Za-z0-9][א-תA-Za-z0-9 ]*$/.test(name);
 };
 
-const formatDateTime = dateTime => dateformat(dateTime, 'dd/mm/yyyy HH:MM:ss');
+const formatLogDateTime = (dateTime) => dateformat(dateTime, 'dd/mm/yyyy HH:MM:ss');
 
-const average = arr => {
+const formatFileNameDate = (dateTime) => dateformat(dateTime, 'yyyy-mm-dd');
+
+const average = (arr) => {
     return arr.reduce((a, b) => a + b) / arr.length;
 };
 
-const logClientInformation = async socket => {
-    console.log(`[${formatDateTime(new Date())}] A user has connected:
+const logClientInformation = async (socket) => {
+    log(`[${formatLogDateTime(new Date())}] A user has connected:
 socket ID: ${socket?.id}`);
 
     const ip = socket?.client?.request?.headers['x-real-ip'];
@@ -242,18 +229,26 @@ socket ID: ${socket?.id}`);
         return;
     }
 
-    console.log(`IP: ${ip}
+    log(`IP: ${ip}
 Location: ${locationDataResult.country} - ${locationDataResult.city}`);
 };
 
 (async () => {
     const tunnel = await localtunnel({ port: 80, subdomain: 'stav' });
 
-    console.log(`Tunnel opened at: ${tunnel.url}`);
-
-    tunnel.on('close', () => {
-        console.log('Tunnel closed');
-    });
+    log(`Tunnel opened at: ${tunnel.url}`);
 })();
 
-httpServer.listen('80', () => console.log('Running ...'));
+const log = (content) => {
+    const logsFolderName = 'logs';
+    const currentDate = formatFileNameDate(new Date());
+
+    console.log(content);
+
+    if (!fs.existsSync(logsFolderName)) {
+        fs.mkdirSync(logsFolderName);
+    }
+    fs.appendFileSync(`${logsFolderName}/${currentDate}.txt`, content + '\n');
+};
+
+httpServer.listen('80', () => log('Running ...'));
