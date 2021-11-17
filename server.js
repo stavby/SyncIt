@@ -152,9 +152,9 @@ Reason: ${reason}`
         );
         leaveRoom(socket);
     });
-
-    setInterval(() => socket.emit('ping', new Date().valueOf()), 3000);
 });
+
+setInterval(() => io.emit('ping', new Date().valueOf()), 3000);
 
 const leaveRoom = (socket) => {
     const user = socket.id;
