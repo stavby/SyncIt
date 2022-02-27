@@ -187,10 +187,6 @@ const findUserInRoom = (socketId, room) => {
     return rooms[room].members.find((member) => member.id === socketId);
 };
 
-const findOwnerOfRoom = (room) => {
-    return rooms[room].members.find((member) => member.isOwner);
-};
-
 const getRoomOfUser = (socketId) => {
     const room = Object.entries(rooms).find((room) => room[1].members.map((member) => member.id).includes(socketId));
 
@@ -201,7 +197,7 @@ const getRoomOfUser = (socketId) => {
 };
 
 const nameValid = (name) => {
-    return name.length <= 20 && /^[א-תA-Za-z0-9 ]*[א-תA-Za-z0-9][א-תA-Za-z0-9 ]*$/.test(name);
+    return name.length <= 40 && /^[א-תA-Za-z0-9 ]*[א-תA-Za-z0-9][א-תA-Za-z0-9 ]*$/.test(name);
 };
 
 const formatLogDateTime = (dateTime) => dateformat(dateTime, 'dd/mm/yyyy HH:MM:ss');
